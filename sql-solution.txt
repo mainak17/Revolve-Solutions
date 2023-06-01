@@ -1,0 +1,81 @@
+Solution
+--------
+1. Which manufacturer's planes had most no of flights? And how many flights?
+
+Ans: BOEING had most number of flights, a total of 1103.
+
+Query: 
+select count(1) as flight_count,p.manufacturer
+from flights f
+inner join planes p
+on f.tailnum = p.tailnum
+group by p.manufacturer
+order by flight_count desc
+limit 1;
+
+2. Which manufacturer's planes had most no of flying hours? And how many hours?
+Ans: BOEING had most number of flying hours. Total 14872 hours.
+
+Query: 
+select 
+sum((case when f.hour='NA' then 0 else f.hour::integer*60 end) 
++
+(case when f.minute='NA' then 0 else f.minute::integer end))/60 as total_time
+ ,p.manufacturer
+from flights f
+inner join planes p
+on f.tailnum = p.tailnum
+group by p.manufacturer
+order by total_time desc
+limit 1;
+
+3. Which plane flew the most number of hours? And how many hours?
+Ans : Plane with tailnum = N737MQ, flew the most number of hours. a total of 177 hours.
+Query : select 
+sum((case when f.hour='NA' then 0 else f.hour::integer*60 end) 
++
+(case when f.minute='NA' then 0 else f.minute::integer end))/60 as total_time
+ ,p.tailnum
+from flights f
+inner join planes p
+on f.tailnum = p.tailnum
+group by p.tailnum
+order by total_time desc
+limit 1;
+
+4. Which destination had most delay in flights?
+Ans : Hartsfield-Jackson Atlanta International Airport
+Query : 
+select ap."AIRPORT"
+from flights f
+inner join airports ap
+on f.dest = ap."IATA_CODE"
+where (
+case when arr_delay='NA' then 0 else arr_delay::integer
+end) > 0
+group by f.dest,ap."AIRPORT"
+order by count(1) desc
+limit 1;
+
+5. Which manufactures planes had covered most distance? And how much distance?
+Ans : BOEING's planes had covered the most distance. Total distance is 1644180 miles.
+Query : 
+select sum(distance) as total_distance ,p.manufacturer
+from flights f
+inner join planes p
+on f.tailnum = p.tailnum
+group by p.manufacturer
+order by total_distance desc
+limit 1;
+
+6. Which airport had most flights on weekends?
+Ans : John F. Kennedy International Airport(New York International Airport) had most flights on weekends.
+Query : 
+SELECT ap."AIRPORT"
+from flights f
+inner join airports ap
+on f.origin = ap."IATA_CODE"
+where extract(dow from date(f.year || '-' || f.month || '-' || f.day)) in (0, 6)
+group by ap."AIRPORT"
+order by count(1) desc
+limit 1;
